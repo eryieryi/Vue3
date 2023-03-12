@@ -1,23 +1,33 @@
 <template>
   <h2>姓名：{{name}}</h2>
   <h2>年龄：{{age}}</h2>
-  <button @click="sayHello">hello</button>
+  <h3>工作：{{job.type}}</h3>
+  <h3>薪资：{{job.salary}}</h3>
+  <button @click="changeInfo">点击修改数据</button>
 </template>
 
 <script>
+  import {ref} from 'vue'
   export default {
     name: 'App',
-    //此处只是测试一下setup，暂时不考虑响应式的问题。
     setup() {
-      let name = "Vue"
-      let age = 18
-      function sayHello() {
-        alert('你好')
+      let name = ref("Vue")
+      let age = ref(18)
+      let job = ref({
+        type : '前端',
+        salary : '20k'
+      })
+      function changeInfo() {
+        name.value = '李四'
+        age.value = 40
+        job.value.type = 'UI'
+        job.value.salary = '30k'
       }
       return {
         name,
         age,
-        sayHello
+        job,
+        changeInfo
       }
     }
   }
