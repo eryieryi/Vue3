@@ -1,27 +1,24 @@
 <template>
-  <!-- Vue3组件中的模板结构可以没有根标签 -->
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <h2>姓名：{{name}}</h2>
+  <h2>年龄：{{age}}</h2>
+  <button @click="sayHello">hello</button>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
+  export default {
+    name: 'App',
+    //此处只是测试一下setup，暂时不考虑响应式的问题。
+    setup() {
+      let name = "Vue"
+      let age = 18
+      function sayHello() {
+        alert('你好')
+      }
+      return {
+        name,
+        age,
+        sayHello
+      }
+    }
   }
-}
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
