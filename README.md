@@ -100,4 +100,103 @@
     语法：const 代理对象= reactive(源对象)接收一个对象（或数组），返回一个代理对象（Proxy的实例对象，简称proxy对象）
     reactive定义的响应式数据是“深层次的”。
     内部基于 ES6 的 Proxy 实现，通过代理对象操作源对象内部数据进行操作。
-            
+
+## Vue3.0中的响应式原理
+### Vue2.x的响应式
+
+        实现原理
+        对象类型：通过Object.defineProperty()对属性的读取、修改进行拦截（数据劫持）。
+        数组类型：通过重写更新数组的一系列方法来实现拦截。（对数组的变更方法进行了包裹）。
+            Object.defineProperty(data, 'count', {
+                get () {}, 
+                set () {}
+            })
+        存在问题
+            新增属性、删除属性, 界面不会更新。
+            直接通过下标修改数组, 界面不会自动更新。
+
+        解决方案
+            使用Vue.set、Vue.delete或者vm.$set、vm.$delete这些API
+
+        模拟Vue2中实现响应式
+            //源数据
+            let person = {
+                name:'张三',
+                age:18
+            }
+            //模拟Vue2中实现响应式
+            let p = {}
+            Object.defineProperty(p,'name',{
+                configurable:true,
+                get(){ //有人读取name时调用
+                    return person.name
+                },
+                set(value){ //有人修改name时调用
+                    console.log('有人修改了name属性，我发现了，我要去更新界面！')
+                    person.name = value
+                }
+            })
+            Object.defineProperty(p,'age',{
+                get(){ //有人读取age时调用
+                    return person.age
+                },
+                set(value){ //有人修改age时调用
+                    console.log('有人修改了age属性，我发现了，我要去更新界面！')
+                    person.age = value
+                }
+            })
+
+### Vue3.0的响应式
+    实现原理
+
+        通过Proxy（代理）:  拦截对象中任意属性的变化, 包括：属性值的读写、属性的添加、属性的删除等。
+        通过Reflect（反射）:  对源对象的属性进行操作。
+        MDN文档中描述的Proxy与Reflect：
+            Proxy： https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy
+            Reflect： https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Reflect
+
+        关于代理与反射，可以看这篇博文
+
+        模拟Vue3中实现响应式
+
+            let person = {
+                name:'张三',
+                age:18
+            }
+            const p = new Proxy(person,{
+                //有人读取p的某个属性时调用
+                get(target,propName){
+                    console.log(`有人读取了p身上的${propName}属性`)
+                    // return target[propName]
+                    return Reflect.get(target,propName)
+                },
+                //有人修改p的某个属性、或给p追加某个属性时调用
+                set(target,propName,value){
+                    console.log(`有人修改了p身上的${propName}属性，我要去更新界面了！`)
+                    // target[propName] = value
+                    return Reflect.set(target,propName,value)
+                },
+                //有人删除p的某个属性时调用
+                deleteProperty(target,propName){
+                    console.log(`有人删除了p身上的${propName}属性，我要去更新界面了！`)
+                    // return delete target[propName]
+                    return Reflect.deleteProperty(target,propName)
+                }
+            })
+
+##  reactive对比ref
+
+    从定义数据角度对比
+        ref用来定义：基本类型数据。
+        reactive用来定义：对象（或数组）类型数据。
+        备注：ref也可以用来定义对象（或数组）类型数据, 它内部会自动通过reactive转为代理对象。
+
+    从原理角度对比
+        ref通过类中的的getter与setter来实现响应式（数据劫持）。
+        reactive通过使用Proxy来实现响应式（数据劫持）, 并通过Reflect操作源对象内部的数据。
+
+    从使用角度对比
+        ref定义的数据：操作数据需要.value，读取数据时模板中直接读取不需要.value。
+        reactive定义的数据：操作数据与读取数据：均不需要.value。
+
+                            
